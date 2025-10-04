@@ -1,0 +1,178 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-dark-600;
+  }
+  
+  body {
+    @apply bg-dark-900 text-white font-sans;
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(255, 16, 240, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Cyberpunk Button Styles */
+  .btn-cyber {
+    @apply relative overflow-hidden bg-transparent border-2 border-neon-pink text-neon-pink 
+           font-medium px-6 py-3 rounded-lg transition-all duration-300 
+           hover:bg-neon-pink hover:text-dark-900 hover:shadow-neon-pink
+           focus:outline-none focus:ring-2 focus:ring-neon-pink focus:ring-opacity-50;
+  }
+
+  .btn-cyber::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent 
+           -translate-x-full transition-transform duration-700;
+  }
+
+  .btn-cyber:hover::before {
+    @apply translate-x-full;
+  }
+
+  .btn-cyber-purple {
+    @apply border-neon-purple text-neon-purple hover:bg-neon-purple hover:shadow-neon-purple;
+  }
+
+  .btn-cyber-blue {
+    @apply border-neon-blue text-neon-blue hover:bg-neon-blue hover:shadow-neon-blue;
+  }
+
+  .btn-cyber-cyan {
+    @apply border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:shadow-neon-cyan;
+  }
+
+  /* Glowing Card Styles */
+  .card-glow {
+    @apply bg-dark-800/50 backdrop-blur-sm border border-dark-600/50 rounded-xl p-6
+           shadow-lg transition-all duration-300 hover:shadow-neon-purple;
+  }
+
+  .card-glow-pink {
+    @apply card-glow hover:border-neon-pink/50 hover:shadow-neon-pink;
+  }
+
+  .card-glow-purple {
+    @apply card-glow hover:border-neon-purple/50 hover:shadow-neon-purple;
+  }
+
+  .card-glow-blue {
+    @apply card-glow hover:border-neon-blue/50 hover:shadow-neon-blue;
+  }
+
+  /* Input Styles */
+  .input-cyber {
+    @apply bg-dark-800/50 border border-dark-600 text-white placeholder-gray-400
+           focus:border-neon-purple focus:ring-2 focus:ring-neon-purple/20
+           rounded-lg px-4 py-3 transition-all duration-300;
+  }
+
+  /* Text Styles */
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  .text-glow-pink {
+    @apply text-neon-pink text-glow;
+  }
+
+  .text-glow-purple {
+    @apply text-neon-purple text-glow;
+  }
+
+  .text-glow-blue {
+    @apply text-neon-blue text-glow;
+  }
+
+  .text-glow-cyan {
+    @apply text-neon-cyan text-glow;
+  }
+
+  /* Animation Classes */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Scrollbar Styles */
+  .scrollbar-cyber::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-cyber::-webkit-scrollbar-track {
+    @apply bg-dark-800;
+  }
+
+  .scrollbar-cyber::-webkit-scrollbar-thumb {
+    @apply bg-neon-purple rounded-full;
+  }
+
+  .scrollbar-cyber::-webkit-scrollbar-thumb:hover {
+    @apply bg-neon-pink;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0% { 
+    box-shadow: 0 0 5px rgba(255, 16, 240, 0.5), 0 0 10px rgba(255, 16, 240, 0.3), 0 0 15px rgba(255, 16, 240, 0.2);
+  }
+  100% { 
+    box-shadow: 0 0 10px rgba(255, 16, 240, 0.8), 0 0 20px rgba(255, 16, 240, 0.6), 0 0 30px rgba(255, 16, 240, 0.4);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 5px rgba(139, 92, 246, 0.5);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 30px rgba(139, 92, 246, 0.6);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-glow,
+  .animate-pulse-glow {
+    animation: none;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
