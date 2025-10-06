@@ -1,388 +1,401 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  MoreHorizontal,
-  Sparkles,
-  Zap,
-  Brain,
-  Users,
-  Settings,
-  Bell,
-  Home,
-  Flame,
-  TreePine,
-  MessageSquare
-} from 'lucide-react'
-
-// Import components
-import AuthModal from '@/components/auth/AuthModal'
-import AITwinInterface from '@/components/ai-twin/AITwinInterface'
-import ThemePreview from '@/components/ai-twin/ThemePreview'
-import FeedSummarizer from '@/components/ai-twin/FeedSummarizer'
-import PostDrafter from '@/components/ai-twin/PostDrafter'
-import Feed from '@/components/social/Feed'
-import PostCard from '@/components/social/PostCard'
-import StreakTracker from '@/components/social/StreakTracker'
-import DuetThread from '@/components/social/DuetThread'
-import HomeChannel from '@/components/family/HomeChannel'
-import GenerationsTree from '@/components/family/GenerationsTree'
-import NotificationCenter from '@/components/realtime/NotificationCenter'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Search, TrendingUp, Users, MessageCircle, Heart, Share2, MoreHorizontal, Plus } from 'lucide-react'
+import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Avatar } from '@/components/ui/Avatar'
+import PostCard from '@/components/social/PostCard'
+import AuthModal from '@/components/auth/AuthModal'
 
-// Mock data for demonstration
-const mockUser = {
-  id: '1',
-  username: 'cyberpunk_user',
-  avatar: '/images/cyberpunk-avatar.svg',
-  isVerified: true,
-  status: 'online' as const
-}
-
-const mockPosts = [
+// Mock feed data
+const mockFeed = [
   {
     id: '1',
-    authorId: '1',
-    author: mockUser,
-    content: 'Just discovered this amazing cyberpunk cityscape! The neon lights and futuristic architecture are absolutely breathtaking. #cyberpunk #neon #futuristic',
-    media: [{
+    author: {
       id: '1',
-      url: '/images/cyberpunk-cityscape.svg',
-      type: 'image' as const,
-      alt: 'Cyberpunk cityscape with neon lights'
-    }],
-    type: 'image' as const,
-    visibility: 'public' as const,
+      username: 'cyberpunk_creator',
+      displayName: 'Cyberpunk Creator',
+      avatar: '/images/cyberpunk-avatar.svg',
+      isVerified: true
+    },
+    content: 'Just finished this amazing cyberpunk cityscape render! The neon lights and futuristic architecture create such an immersive atmosphere. What do you think about the color palette? #cyberpunk #neon #futuristic #art',
+    media: [
+      {
+        id: '1',
+        url: '/images/cyberpunk-cityscape.svg',
+        type: 'image',
+        alt: 'Cyberpunk cityscape with neon lights'
+      }
+    ],
+    type: 'image',
+    visibility: 'public',
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    likes: [],
-    comments: [],
-    shares: [],
-    reactions: [],
-    tags: ['cyberpunk', 'neon', 'futuristic'],
+    likes: Array(245).fill({ id: 'mock', userId: 'mock' }),
+    comments: Array(32).fill({ id: 'mock', userId: 'mock', content: 'mock' }),
+    shares: Array(18).fill({ id: 'mock', userId: 'mock' }),
+    tags: ['cyberpunk', 'neon', 'futuristic', 'art'],
+    isPinned: false,
+    aiGenerated: false
+  },
+  {
+    id: '2',
+    author: {
+      id: '2',
+      username: 'tech_enthusiast',
+      displayName: 'Tech Enthusiast',
+      avatar: '/images/tech-avatar.svg',
+      isVerified: false
+    },
+    content: 'AI is revolutionizing how we create and consume content. My AI Twin just helped me draft this post about the future of social media. The possibilities are endless! 🤖✨',
+    media: [],
+    type: 'text',
+    visibility: 'public',
+    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
+    likes: Array(189).fill({ id: 'mock', userId: 'mock' }),
+    comments: Array(45).fill({ id: 'mock', userId: 'mock', content: 'mock' }),
+    shares: Array(23).fill({ id: 'mock', userId: 'mock' }),
+    tags: ['AI', 'technology', 'future', 'social media'],
     isPinned: false,
     aiGenerated: false
   }
 ]
 
-const mockStreaks = [
-  {
-    id: '1',
-    participants: ['1', '2', '3'],
-    type: 'daily' as const,
-    currentCount: 15,
-    longestCount: 30,
-    lastActivity: new Date(),
-    isActive: true,
-    name: 'Daily Workout',
-    description: 'Stay fit together with daily exercise'
-  }
-]
-
-const mockFamilyMembers = [
-  {
-    id: '1',
-    name: 'Sarah Johnson',
-    avatar: '/images/cyberpunk-avatar.svg',
-    relationship: 'parent' as const,
-    isOnline: true,
-    lastActive: new Date()
-  },
-  {
-    id: '2',
-    name: 'Mike Johnson',
-    avatar: '/images/cyberpunk-avatar.svg',
-    relationship: 'parent' as const,
-    isOnline: false,
-    lastActive: new Date(Date.now() - 2 * 60 * 60 * 1000)
-  }
-]
-
-const mockNotifications = [
-  {
-    id: '1',
-    userId: '1',
-    type: 'like' as const,
-    title: 'New Like',
-    message: 'Sarah liked your post about cyberpunk art',
-    isRead: false,
-    createdAt: new Date(Date.now() - 30 * 60 * 1000),
-    actionUrl: '/post/1'
-  }
+const trendingTopics = [
+  { tag: '#cyberpunk', posts: 1250, growth: '+15%' },
+  { tag: '#AI', posts: 890, growth: '+22%' },
+  { tag: '#neon', posts: 650, growth: '+8%' },
+  { tag: '#futuristic', posts: 420, growth: '+12%' }
 ]
 
 export default function HomePage() {
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [currentView, setCurrentView] = useState<'feed' | 'ai-twin' | 'streaks' | 'family' | 'tree'>('feed')
-  const [showAuth, setShowAuth] = useState(false)
-  const [showAITwin, setShowAITwin] = useState(false)
-  const [showThemePreview, setShowThemePreview] = useState(false)
-  const [showFeedSummarizer, setShowFeedSummarizer] = useState(false)
-  const [showPostDrafter, setShowPostDrafter] = useState(false)
-  const [showNotifications, setShowNotifications] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
 
-  useEffect(() => {
-    setIsLoaded(true)
-  }, [])
-
-  const handleLogin = (data: any) => {
-    console.log('Login:', data)
-    setIsAuthenticated(true)
-    setShowAuth(false)
+  const handleAuthSuccess = () => {
+    setIsLoggedIn(true)
+    setShowAuthModal(false)
   }
 
-  const handleRegister = (data: any) => {
-    console.log('Register:', data)
-    setIsAuthenticated(true)
-    setShowAuth(false)
+  const handleLike = (postId: string) => {
+    console.log('Liked post:', postId)
   }
 
-  const handleAITwinAction = (action: string) => {
-    switch (action) {
-      case 'summarize':
-        setShowFeedSummarizer(true)
-        break
-      case 'draft':
-        setShowPostDrafter(true)
-        break
-      case 'theme':
-        setShowThemePreview(true)
-        break
-    }
+  const handleComment = (postId: string) => {
+    console.log('Commented on post:', postId)
   }
 
-  const navigationItems = [
-    { id: 'feed', label: 'Feed', icon: MessageSquare, color: 'purple' },
-    { id: 'ai-twin', label: 'AI Twin', icon: Brain, color: 'pink' },
-    { id: 'streaks', label: 'Streaks', icon: Flame, color: 'blue' },
-    { id: 'family', label: 'Family', icon: Home, color: 'cyan' },
-    { id: 'tree', label: 'Tree', icon: TreePine, color: 'green' }
-  ]
+  const handleShare = (postId: string) => {
+    console.log('Shared post:', postId)
+  }
 
+  const handleBookmark = (postId: string) => {
+    console.log('Bookmarked post:', postId)
+  }
+
+  const handleReport = (postId: string) => {
+    console.log('Reported post:', postId)
+  }
+
+  if (!isLoggedIn) {
   return (
-    <div className="min-h-screen bg-dark-900 text-white">
-      {/* Header */}
-      <motion.header 
-        className="sticky top-0 z-50 bg-dark-900/80 backdrop-blur-md border-b border-dark-600/50"
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <motion.h1 
-                className="text-2xl font-bold text-glow-pink font-cyber"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
+      <div className="min-h-screen bg-dark-900">
+        {/* Modern Hero Section */}
+        <div className="relative overflow-hidden min-h-screen flex items-center">
+          {/* Animated Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-dark-900 via-dark-800 to-dark-900"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neon-purple/10 via-transparent to-neon-pink/10"></div>
+          
+          {/* Floating Particles */}
+          <div className="absolute inset-0">
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-neon-purple rounded-full animate-pulse"></div>
+            <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-neon-pink rounded-full animate-pulse delay-1000"></div>
+            <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-neon-blue rounded-full animate-pulse delay-500"></div>
+            <div className="absolute top-2/3 right-1/4 w-1 h-1 bg-neon-purple rounded-full animate-pulse delay-2000"></div>
+          </div>
+          
+          <div className="relative container mx-auto px-6 py-32">
+            <div className="max-w-5xl mx-auto text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="mb-8"
               >
+                <h1 className="text-7xl md:text-8xl font-bold text-white mb-8 font-orbitron leading-tight">
+                  Welcome to{' '}
+                  <span className="bg-gradient-to-r from-neon-pink via-neon-purple to-neon-blue bg-clip-text text-transparent animate-gradient">
                 Twinen
-              </motion.h1>
-              <div className="flex items-center space-x-2">
-                <Heart className="w-5 h-5 text-neon-pink" />
-                <Heart className="w-5 h-5 text-neon-pink" />
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              {!isAuthenticated ? (
-                <Button
-                  variant="cyber-purple"
-                  onClick={() => setShowAuth(true)}
+                  </span>
+                </h1>
+              </motion.div>
+              
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed"
+              >
+                The next-generation social network that moves with you. Connect with your AI Twin and build meaningful relationships in a cyberpunk-inspired digital world.
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="flex flex-col sm:flex-row gap-6 justify-center"
+              >
+                <motion.button
+                  onClick={() => {
+                    setAuthMode('register')
+                    setShowAuthModal(true)
+                  }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-10 py-5 bg-gradient-to-r from-neon-pink to-neon-purple text-white font-bold rounded-2xl hover:from-neon-pink/90 hover:to-neon-purple/90 transition-all duration-300 shadow-2xl hover:shadow-neon-purple/30 text-lg backdrop-blur-sm"
+                >
+                  Join the Future
+                </motion.button>
+                <motion.button
+                  onClick={() => {
+                    setAuthMode('login')
+                    setShowAuthModal(true)
+                  }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-10 py-5 border-2 border-white/30 text-white font-bold rounded-2xl hover:bg-white/10 hover:border-white/50 transition-all duration-300 backdrop-blur-sm text-lg shadow-xl"
                 >
                   Sign In
-                </Button>
-              ) : (
-                <>
-                  <button 
-                    className="p-2 rounded-lg hover:bg-dark-800 transition-colors relative"
-                    onClick={() => setShowNotifications(true)}
-                  >
-                    <Bell className="w-5 h-5 text-gray-400" />
-                    {mockNotifications.filter(n => !n.isRead).length > 0 && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
-                    )}
-                  </button>
-                  <Avatar
-                    name={mockUser.username}
-                    size="sm"
-                    status="online"
-                    verified={mockUser.isVerified}
-                  />
-                </>
-              )}
+                </motion.button>
+              </motion.div>
             </div>
           </div>
         </div>
-      </motion.header>
 
-      {/* Navigation */}
-      <nav className="border-b border-dark-600/50 bg-dark-900/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-1 py-2">
-            {navigationItems.map((item) => (
-              <Button
-                key={item.id}
-                variant={currentView === item.id ? `cyber-${item.color}` as any : 'ghost'}
-                size="sm"
-                onClick={() => setCurrentView(item.id as any)}
-                className="flex items-center space-x-2"
-              >
-                <item.icon className="w-4 h-4" />
-                <span>{item.label}</span>
-              </Button>
-            ))}
+
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          defaultMode={authMode}
+          onLogin={(data) => {
+            console.log('Login:', data)
+            handleAuthSuccess()
+          }}
+          onRegister={(data) => {
+            console.log('Register:', data)
+            handleAuthSuccess()
+          }}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-dark-900">
+      {/* Modern Header Navigation */}
+      <div className="bg-black/50 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between h-20">
+            <div className="text-3xl font-bold text-white font-orbitron tracking-tight">Twinen</div>
+            <nav className="flex items-center space-x-1">
+              <a href="#" className="px-4 py-2 rounded-xl text-white font-medium bg-white/10 border border-white/20">Home</a>
+              <a href="/profile/adrian" className="px-4 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-200">Profile</a>
+              <a href="/messages" className="px-4 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-200">Messages</a>
+              <a href="/friends" className="px-4 py-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-200">Friends</a>
+            </nav>
+            <div className="flex items-center space-x-4">
+              <Avatar src="/images/cyberpunk-avatar.svg" size="md" />
+              <span className="text-white font-medium">Adrian</span>
+            </div>
           </div>
         </div>
-      </nav>
+      </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AnimatePresence mode="wait">
-          {isLoaded && (
-            <motion.div
-              key={currentView}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {currentView === 'feed' && (
-                <Feed
-                  posts={mockPosts}
-                  onLoadMore={() => console.log('Load more posts')}
-                  onFilterChange={(filters) => console.log('Filter change:', filters)}
-                />
-              )}
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          
+          {/* Left Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            
+            {/* Search */}
+            <div className="modern-card theme-glow rounded-2xl">
+              <div className="p-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    placeholder="Search Twinen..."
+                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-400 focus:border-white/20 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
 
-              {currentView === 'ai-twin' && (
-                <div className="space-y-6">
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gradient-to-br from-neon-purple to-neon-pink rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Brain className="w-8 h-8 text-white" />
+            {/* Trending Topics */}
+            <div className="modern-card theme-glow rounded-2xl">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <TrendingUp className="w-5 h-5 mr-2 text-white/60" />
+                  Trending
+                </h3>
+                
+                <div className="space-y-3">
+                  {trendingTopics.map((topic, index) => (
+                    <div key={topic.tag} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-sm font-bold text-gray-400">#{index + 1}</span>
+                        <span className="text-white font-medium">{topic.tag}</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-300">{topic.posts} posts</div>
+                        <div className="text-xs text-green-400">{topic.growth}</div>
+                      </div>
                     </div>
-                    <h2 className="text-2xl font-bold text-glow-purple mb-4">AI Twin Powers</h2>
-                    <p className="text-gray-400 mb-8">Your personal AI assistant for social connections</p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <Button
-                        variant="cyber-purple"
-                        onClick={() => handleAITwinAction('summarize')}
-                        className="h-20 flex-col space-y-2"
-                      >
-                        <Brain className="w-6 h-6" />
-                        <span>Summarize Feed</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Suggested Users */}
+            <div className="modern-card theme-glow rounded-2xl">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <Users className="w-5 h-5 mr-2 text-white/60" />
+                  Suggested for You
+                </h3>
+                
+                <div className="space-y-3">
+                  {[
+                    { name: 'Cyberpunk Designer', username: 'cyber_designer', followers: '12.5K' },
+                    { name: 'AI Researcher', username: 'ai_researcher', followers: '8.9K' },
+                    { name: 'Neon Artist', username: 'neon_creator', followers: '15.2K' }
+                  ].map((user) => (
+                    <div key={user.username} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Avatar src="/images/suggested-avatar.svg" size="sm" />
+                        <div>
+                          <div className="text-white font-medium">{user.name}</div>
+                          <div className="text-gray-400 text-sm">@{user.username}</div>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" className="text-white hover:bg-white/10">
+                        Follow
                       </Button>
-                      <Button
-                        variant="cyber-pink"
-                        onClick={() => handleAITwinAction('draft')}
-                        className="h-20 flex-col space-y-2"
-                      >
-                        <Zap className="w-6 h-6" />
-                        <span>Draft Post</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Feed */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* Create Post */}
+            <div className="modern-card theme-glow rounded-2xl">
+              <div className="p-6">
+                <div className="flex items-start space-x-3">
+                  <Avatar src="/images/cyberpunk-avatar.svg" size="md" />
+                  <div className="flex-1">
+                    <textarea
+                      placeholder="What's happening in the cyberpunk world?"
+                      className="w-full bg-transparent text-white placeholder-gray-400 resize-none focus:outline-none text-lg mb-4"
+                      rows={3}
+                    />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <Button variant="ghost" size="sm" className="text-gray-400">
+                          <MessageCircle className="w-5 h-5 mr-2" />
+                          Photo
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-gray-400">
+                          <Share2 className="w-5 h-5 mr-2" />
+                          Video
                       </Button>
-                      <Button
-                        variant="cyber-blue"
-                        onClick={() => handleAITwinAction('theme')}
-                        className="h-20 flex-col space-y-2"
-                      >
-                        <Sparkles className="w-6 h-6" />
-                        <span>Change Theme</span>
+                      </div>
+                      <Button variant="cyber-purple" size="sm">
+                        Post
                       </Button>
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
+            </div>
 
-              {currentView === 'streaks' && (
-                <StreakTracker
-                  streaks={mockStreaks}
-                  onCreateStreak={(streak) => console.log('Create streak:', streak)}
-                  onJoinStreak={(id) => console.log('Join streak:', id)}
-                  onLeaveStreak={(id) => console.log('Leave streak:', id)}
+            {/* Feed Posts */}
+            <div className="space-y-6">
+              {mockFeed.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  onLike={handleLike}
+                  onComment={handleComment}
+                  onShare={handleShare}
+                  onBookmark={handleBookmark}
+                  onReport={handleReport}
                 />
-              )}
+              ))}
+            </div>
+          </div>
 
-              {currentView === 'family' && (
-                <HomeChannel
-                  familyMembers={mockFamilyMembers}
-                  posts={[]}
-                  onPlayChannel={() => console.log('Play channel')}
-                  onPauseChannel={() => console.log('Pause channel')}
-                  onLikePost={(id) => console.log('Like post:', id)}
-                  onCommentPost={(id) => console.log('Comment post:', id)}
-                  onSharePost={(id) => console.log('Share post:', id)}
-                />
-              )}
+          {/* Right Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            
+            {/* AI Twin Suggestions */}
+            <div className="modern-card theme-glow rounded-2xl">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <MessageCircle className="w-5 h-5 mr-2 text-white/60" />
+                  AI Twin Suggestions
+                </h3>
+                
+                <div className="space-y-3">
+                  <div className="p-3 bg-white/10 rounded-lg border border-white/20">
+                    <div className="text-sm text-white font-medium mb-1">
+                      Trending in your network
+                    </div>
+                    <div className="text-xs text-gray-300">
+                      #cyberpunk is gaining popularity among your connections
+                    </div>
+                  </div>
+                  
+                  <div className="p-3 bg-white/10 rounded-lg border border-white/20">
+                    <div className="text-sm text-white font-medium mb-1">
+                      Suggested post
+                    </div>
+                    <div className="text-xs text-gray-300">
+                      Share your thoughts on AI in creative industries
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-              {currentView === 'tree' && (
-                <GenerationsTree
-                  tree={{
-                    id: '1',
-                    familyId: '1',
-                    interviews: [],
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                  }}
-                  onStartInterview={(interviewerId, intervieweeId) => console.log('Start interview:', interviewerId, intervieweeId)}
-                  onAddQuestion={(interviewId, question) => console.log('Add question:', interviewId, question)}
-                  onAddResponse={(questionId, response) => console.log('Add response:', questionId, response)}
-                  onPlayInterview={(id) => console.log('Play interview:', id)}
-                  onPauseInterview={(id) => console.log('Pause interview:', id)}
-                />
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
-
-      {/* Modals */}
-      <AuthModal
-        isOpen={showAuth}
-        onClose={() => setShowAuth(false)}
-        onLogin={handleLogin}
-        onRegister={handleRegister}
-      />
-
-      <AITwinInterface
-        isOpen={showAITwin}
-        onClose={() => setShowAITwin(false)}
-      />
-
-      <ThemePreview
-        isOpen={showThemePreview}
-        onClose={() => setShowThemePreview(false)}
-        onApply={(theme) => console.log('Apply theme:', theme)}
-      />
-
-      <FeedSummarizer
-        isOpen={showFeedSummarizer}
-        onClose={() => setShowFeedSummarizer(false)}
-        onViewPost={(postId) => console.log('View post:', postId)}
-      />
-
-      <PostDrafter
-        isOpen={showPostDrafter}
-        onClose={() => setShowPostDrafter(false)}
-        onSaveDraft={(draft) => console.log('Save draft:', draft)}
-        onPublish={(draft) => console.log('Publish:', draft)}
-      />
-
-      <NotificationCenter
-        isOpen={showNotifications}
-        onClose={() => setShowNotifications(false)}
-        notifications={mockNotifications}
-        onMarkAsRead={(id) => console.log('Mark as read:', id)}
-        onMarkAllAsRead={() => console.log('Mark all as read')}
-        onClearAll={() => console.log('Clear all')}
-        onActionClick={(notification) => console.log('Action click:', notification)}
-      />
+            {/* Quick Actions */}
+            <div className="modern-card theme-glow rounded-2xl">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+                
+                <div className="space-y-2">
+                  <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5">
+                    <Heart className="w-4 h-4 mr-2" />
+                    Liked Posts
+                  </Button>
+                  <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Your Comments
+                  </Button>
+                  <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-white/5">
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Shared Posts
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -3,6 +3,102 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom animations */
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+/* Accessibility improvements */
+@layer base {
+  /* Screen reader only content */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Focus management */
+  .keyboard-focus:focus {
+    outline: 2px solid theme('colors.neon.purple');
+    outline-offset: 2px;
+  }
+
+  /* High contrast mode */
+  .high-contrast {
+    filter: contrast(150%);
+  }
+
+  .high-contrast * {
+    filter: contrast(150%);
+  }
+
+  /* Reduced motion */
+  .reduced-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Font size scaling */
+  .font-small {
+    font-size: 0.875rem;
+  }
+
+  .font-medium {
+    font-size: 1rem;
+  }
+
+  .font-large {
+    font-size: 1.125rem;
+  }
+
+  .font-extra-large {
+    font-size: 1.25rem;
+  }
+
+  /* Screen reader optimizations */
+  .screen-reader-optimized {
+    /* Hide decorative elements from screen readers */
+  }
+
+  .screen-reader-optimized .decorative {
+    display: none;
+  }
+
+  /* Skip links */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: theme('colors.dark.900');
+    color: theme('colors.neon.purple');
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 1000;
+  }
+
+  .skip-link:focus {
+    top: 6px;
+  }
+}
+
 @layer base {
   * {
     @apply border-dark-600;

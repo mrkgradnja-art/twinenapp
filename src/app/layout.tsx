@@ -37,8 +37,19 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={`${inter.className} antialiased`}>
+        {/* Skip to main content link for accessibility */}
+        <a 
+          href="#main-content" 
+          className="skip-link"
+          tabIndex={1}
+        >
+          Skip to main content
+        </a>
+        
         <div id="root" className="min-h-screen bg-dark-900">
-          {children}
+          <main id="main-content" role="main">
+            {children}
+          </main>
         </div>
       </body>
     </html>

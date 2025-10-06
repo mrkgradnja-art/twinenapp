@@ -1,6 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { createAccessibleButtonProps } from '@/lib/accessibility'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'cyber' | 'cyber-purple' | 'cyber-blue' | 'cyber-cyan' | 'ghost' | 'outline'
@@ -9,6 +10,11 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean
   icon?: React.ReactNode
   children: React.ReactNode
+  ariaLabel?: string
+  ariaDescribedBy?: string
+  ariaControls?: string
+  ariaExpanded?: boolean
+  ariaPressed?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -21,6 +27,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     icon,
     children, 
     disabled,
+    ariaLabel,
+    ariaDescribedBy,
+    ariaControls,
+    ariaExpanded,
+    ariaPressed,
     ...props 
   }, ref) => {
     const baseClasses = "relative overflow-hidden font-medium rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -42,6 +53,19 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     
     const glowClasses = glow ? "animate-pulse-glow" : ""
     
+    // Generate accessible button props
+    const accessibleProps = createAccessibleButtonProps(
+      () => {}, // onClick will be handled by the actual button
+      ariaLabel || (typeof children === 'string' ? children : 'Button'),
+      {
+        disabled: disabled || loading,
+        pressed: ariaPressed,
+        expanded: ariaExpanded,
+        controls: ariaControls,
+        describedBy: ariaDescribedBy
+      }
+    )
+
     return (
       <motion.button
         ref={ref}
@@ -50,11 +74,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           variants[variant],
           sizes[size],
           glowClasses,
+          "keyboard-focus:ring-2 keyboard-focus:ring-neon-purple/50",
           className
         )}
         disabled={disabled || loading}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
+        {...accessibleProps}
         {...props}
       >
         {loading && (
@@ -62,6 +88,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             className="absolute inset-0 flex items-center justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            aria-hidden="true"
           >
             <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
           </motion.div>
